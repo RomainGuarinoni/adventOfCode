@@ -2,6 +2,10 @@ import {
   getNumberFromInput,
   getValueFromInput,
   getFinalNumberFromInputs,
+  isValidFirstDigit,
+  extractNumberFromInput,
+  parseInputToNumber,
+  getNumberValueFromInput,
 } from "./helpers";
 
 describe("Day 1", () => {
@@ -33,6 +37,50 @@ describe("Day 1", () => {
       const expectedValue = 45 + 92;
 
       expect(getFinalNumberFromInputs(inputs)).toEqual(expectedValue);
+    });
+  });
+
+  describe("isValidFirstDigit", () => {
+    it("should return true", () => {
+      expect(isValidFirstDigit("t")).toEqual(true);
+    });
+
+    it("should return false", () => {
+      expect(isValidFirstDigit("a")).toEqual(false);
+    });
+  });
+
+  describe("extractNumberFromInput", () => {
+    it("should extract the number 4", () => {
+      expect(extractNumberFromInput("four")).toStrictEqual("four");
+    });
+
+    it("should return undefined", () => {
+      expect(extractNumberFromInput("foor")).toBeUndefined();
+    });
+
+    it("should return five", () => {
+      expect(extractNumberFromInput("fivefour")).toStrictEqual("five");
+    });
+  });
+
+  describe("parseInputToNumber", () => {
+    const input = "oneighttwo4dfkjfour9";
+
+    it("parse the input and return the numbers", () => {
+      const expectedNumbers = [1, 8, 2, 4, 4, 9];
+
+      expect(parseInputToNumber(input)).toEqual(expectedNumbers);
+    });
+  });
+
+  describe("getNumberValueFromInput", () => {
+    it("get a the final number from an input", () => {
+      const input = "onetwo4dfkjfour9";
+
+      const expectedValue = 19;
+
+      expect(getNumberValueFromInput(input)).toEqual(expectedValue);
     });
   });
 });
