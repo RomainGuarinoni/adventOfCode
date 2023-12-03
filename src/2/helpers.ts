@@ -39,3 +39,22 @@ export const isRoundValid = (round: Round) =>
 
 export const isGameValid = (game: GameResult) =>
   game.rounds.every(isRoundValid);
+
+export const getMinimumNbCube = (rounds: Round[]): Round => {
+  const minimumRound: Round = {
+    red: 0,
+    blue: 0,
+    green: 0,
+  };
+
+  rounds.forEach((round) => {
+    Object.entries(round).forEach(([colour, value]) => {
+      if (minimumRound[colour] < value) minimumRound[colour] = value;
+    });
+  });
+
+  return minimumRound;
+};
+
+export const getCubePower = (round: Round) =>
+  Object.values(round).reduce((acc, curr) => acc * curr, 1);

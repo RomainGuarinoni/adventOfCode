@@ -1,7 +1,12 @@
-import { isGameValid, parseGameResult } from "./helpers";
+import {
+  getCubePower,
+  getMinimumNbCube,
+  isGameValid,
+  parseGameResult,
+} from "./helpers";
 import { inputs } from "./inputs.json";
 
-const finalNumber = inputs.reduce((acc, curr) => {
+const firstFinalNumber = inputs.reduce((acc, curr) => {
   const gameResult = parseGameResult(curr);
 
   if (!isGameValid(gameResult)) {
@@ -11,4 +16,12 @@ const finalNumber = inputs.reduce((acc, curr) => {
   return acc + gameResult.gameId;
 }, 0);
 
-console.log(finalNumber);
+console.log("First part day 2 response", firstFinalNumber);
+
+const secondFinalNumber = inputs
+  .map(parseGameResult)
+  .map(({ rounds }) => getMinimumNbCube(rounds))
+  .map(getCubePower)
+  .reduce((acc, curr) => acc + curr, 0);
+
+console.log("Second part day 2 response", secondFinalNumber);

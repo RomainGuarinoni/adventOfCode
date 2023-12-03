@@ -1,4 +1,10 @@
-import { isGameValid, isRoundValid, parseGameResult } from "./helpers";
+import {
+  getCubePower,
+  getMinimumNbCube,
+  isGameValid,
+  isRoundValid,
+  parseGameResult,
+} from "./helpers";
 import { GameResult, Round } from "./types";
 
 describe("Day 2", () => {
@@ -95,5 +101,33 @@ describe("Day 2", () => {
 
       expect(isGameValid(game)).toEqual(false);
     });
+  });
+
+  describe("getMinimumNbCube", () => {
+    it("should return the minimum nb of cube", () => {
+      const gameInput =
+        "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
+      const { rounds } = parseGameResult(gameInput);
+
+      const expectedResult: Round = {
+        green: 3,
+        red: 6,
+        blue: 2,
+      };
+
+      expect(getMinimumNbCube(rounds)).toStrictEqual(expectedResult);
+    });
+  });
+
+  describe("getCubePower", () => {
+    const round: Round = {
+      green: 3,
+      red: 6,
+      blue: 2,
+    };
+
+    const expectedResult = 36;
+
+    expect(getCubePower(round)).toEqual(expectedResult);
   });
 });
