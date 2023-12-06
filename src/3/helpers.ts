@@ -1,3 +1,5 @@
+import { Position } from "./types";
+
 export const isNumber = (input: string) => !isNaN(Number.parseInt(input));
 
 export const isSymbol = (input: string) => !isNumber(input) && input !== ".";
@@ -22,77 +24,171 @@ export const getNumberPositionFromLineWithStartIndex = (
   return positions;
 };
 
-export const isNumberInContactWithSymbol = (
+export const isContactTopOrBottom = (
   matrix: string[][],
   lineIndex: number,
-  positions: number[]
-) => {
-  if (lineIndex > 0) {
-    const isInContactFromTop = positions.some((position) =>
-      isSymbol(matrix[lineIndex - 1][position])
-    );
+  positions: number[],
+  predicate: (item: string) => boolean,
+  direction: "top" | "bottom"
+): Position[] | undefined => {
+  if (direction === "top" && lineIndex === 0) return undefined;
+  if (direction === "bottom" && lineIndex >= matrix.length - 1)
+    return undefined;
 
-    if (isInContactFromTop) return true;
-  }
+  const contactPositions: Position[] = [];
 
-  if (lineIndex < matrix.length - 1) {
-    const isInContactFromBottom = positions.some((position) =>
-      isSymbol(matrix[lineIndex + 1][position])
-    );
+  positions.forEach((position) => {
+    if (
+      predicate(matrix[lineIndex + (direction === "top" ? -1 : 1)][position])
+    ) {
+      contactPositions.push([
+        lineIndex + (direction === "top" ? -1 : 1),
+        position,
+      ]);
+    }
+  });
+  return contactPositions.length ? contactPositions : undefined;
+};
 
-    if (isInContactFromBottom) return true;
-  }
+export const isContactLeftOrRight = (
+  matrix: string[][],
+  lineIndex: number,
+  positions: number[],
+  predicate: (item: string) => boolean,
+  direction: "left" | "right"
+): Position | undefined => {
+  const position =
+    direction === "left" ? positions[0] : positions[positions.length - 1];
 
-  if (positions[positions.length - 1] < matrix[0].length - 1) {
-    const isInContactFromRight = isSymbol(
-      matrix[lineIndex][positions[positions.length - 1] + 1]
-    );
-
-    if (isInContactFromRight) return true;
-  }
-
-  if (positions[0] > 0) {
-    const isInContactFromLeft = isSymbol(matrix[lineIndex][positions[0] - 1]);
-
-    if (isInContactFromLeft) return true;
-  }
-
-  if (lineIndex > 0 && positions[0] > 0) {
-    const isInContactFromTopLeft = isSymbol(
-      matrix[lineIndex - 1][positions[0] - 1]
-    );
-
-    if (isInContactFromTopLeft) return true;
-  }
-
-  if (lineIndex > 0 && positions[positions.length - 1] < matrix[0].length - 1) {
-    const isInContactFromTopRight = isSymbol(
-      matrix[lineIndex - 1][positions[positions.length - 1] + 1]
-    );
-
-    if (isInContactFromTopRight) return true;
-  }
-
-  if (lineIndex < matrix.length - 1 && positions[0] > 0) {
-    const isInContactFromBottomLeft = isSymbol(
-      matrix[lineIndex + 1][positions[0] - 1]
-    );
-
-    if (isInContactFromBottomLeft) return true;
-  }
+  if (direction === "left" && position === 0) return undefined;
+  if (direction === "right" && position >= matrix[lineIndex].length - 1)
+    return undefined;
 
   if (
-    lineIndex < matrix.length - 1 &&
-    positions[positions.length - 1] < matrix[0].length - 1
+    predicate(matrix[lineIndex][position + (direction === "left" ? -1 : 1)])
   ) {
-    const isInContactFromBottomRight = isSymbol(
-      matrix[lineIndex + 1][positions[positions.length - 1] + 1]
-    );
-
-    if (isInContactFromBottomRight) return true;
+    return [lineIndex, position + (direction === "left" ? -1 : 1)];
   }
 
-  return false;
+  return undefined;
+};
+
+export const isContactCorners = (
+  matrix: string[][],
+  lineIndex: number,
+  positions: number[],
+  predicate: (item: string) => boolean,
+  y: "top" | "bottom",
+  x: "left" | "right"
+): Position | undefined => {
+  const position = x === "left" ? positions[0] : positions.at(-1);
+
+  if (y === "top" && lineIndex === 0) return undefined;
+  if (y === "bottom" && lineIndex >= matrix.length - 1) return undefined;
+  if (x === "left" && position === 0) return undefined;
+  if (x === "right" && position >= matrix[lineIndex].length - 1)
+    return undefined;
+
+  if (
+    predicate(
+      matrix[lineIndex + (y === "top" ? -1 : 1)][
+        position + (x === "left" ? -1 : 1)
+      ]
+    )
+  ) {
+    return [
+      lineIndex + (y === "top" ? -1 : 1),
+      position + (x === "left" ? -1 : 1),
+    ];
+  }
+
+  return undefined;
+};
+
+export const isItemInContactToPredicate = (
+  matrix: string[][],
+  lineIndex: number,
+  positions: number[],
+  predicate: (item: string) => boolean
+) => {
+  const contactTop = isContactTopOrBottom(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "top"
+  );
+
+  const contactBottom = isContactTopOrBottom(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "bottom"
+  );
+
+  const contactLeft = isContactLeftOrRight(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "left"
+  );
+
+  const contactRight = isContactLeftOrRight(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "right"
+  );
+
+  const contactTopLeft = isContactCorners(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "top",
+    "left"
+  );
+
+  const contactTopRight = isContactCorners(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "top",
+    "right"
+  );
+
+  const contactBottomLeft = isContactCorners(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "bottom",
+    "left"
+  );
+
+  const contactBottomRight = isContactCorners(
+    matrix,
+    lineIndex,
+    positions,
+    predicate,
+    "bottom",
+    "right"
+  );
+
+  return [
+    ...(contactTop ? contactTop : []),
+    ...(contactBottom ? contactBottom : []),
+    ...(contactLeft ? [contactLeft] : []),
+    ...(contactRight ? [contactRight] : []),
+    ...(contactTopLeft ? [contactTopLeft] : []),
+    ...(contactTopRight ? [contactTopRight] : []),
+    ...(contactBottomLeft ? [contactBottomLeft] : []),
+    ...(contactBottomRight ? [contactBottomRight] : []),
+  ];
 };
 
 export const getNumberFromPositions = (
@@ -121,7 +217,10 @@ export const getValidNumbersFromMatrix = (matrix: string[][]) => {
         continue;
       }
 
-      if (isNumberInContactWithSymbol(matrix, lineIndex, positions)) {
+      if (
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+          .length
+      ) {
         validNumbers.push(getNumberFromPositions(matrix, lineIndex, positions));
       }
 
@@ -129,4 +228,127 @@ export const getValidNumbersFromMatrix = (matrix: string[][]) => {
     }
   });
   return validNumbers;
+};
+
+export const findFullNumberFromPosition = (
+  matrix: string[][],
+  position: Position
+) => {
+  const line = position[0];
+
+  let fullNumber = [matrix[line][position[1]]];
+
+  let left = position[1] > 0 ? position[1] - 1 : undefined;
+  let right =
+    position[1] < matrix[line].length - 1 ? position[1] + 1 : undefined;
+
+  while (typeof left === "number" || typeof right === "number") {
+    if (typeof left === "number") {
+      const value = matrix[line][left];
+
+      if (!value || !isNumber(value)) {
+        left = undefined;
+      } else {
+        fullNumber.unshift(value);
+
+        if (left > 0) {
+          left -= 1;
+        } else {
+          left = undefined;
+        }
+      }
+    }
+
+    if (typeof right === "number") {
+      const value = matrix[line][right];
+
+      if (!value || !isNumber(value)) {
+        right = undefined;
+      } else {
+        fullNumber.push(value);
+
+        if (right < matrix[line].length - 1) {
+          right += 1;
+        } else {
+          right = undefined;
+        }
+      }
+    }
+  }
+
+  return Number.parseInt(fullNumber.join(""));
+};
+
+export const getContactPositionByLine = (positions: Position[]) => {
+  const positionByLine: Record<number, number[]> = {};
+
+  positions.forEach((position) => {
+    const line = position[0];
+    const positionInTheLine = position[1];
+
+    if (line in positionByLine) {
+      positionByLine[line].push(positionInTheLine);
+    } else {
+      positionByLine[line] = [positionInTheLine];
+    }
+  });
+
+  Object.values(positionByLine).forEach((positions) =>
+    positions.sort((a, b) => a - b)
+  );
+
+  Object.entries(positionByLine).forEach(([lineIndex, positions]) => {
+    const filteredPosition: number[] = [];
+
+    positions.forEach((position, index) => {
+      if (index === 0) return filteredPosition.push(position);
+
+      if (position - 1 !== positions[index - 1])
+        filteredPosition.push(position);
+    });
+
+    positionByLine[lineIndex] = filteredPosition;
+  });
+
+  return positionByLine;
+};
+
+export const findAllGearRatios = (matrix: string[][]) => {
+  let finalGearRation = 0;
+
+  for (let line = 0; line < matrix.length; line++) {
+    for (let row = 0; row < matrix[line].length; row++) {
+      const currentItem = matrix[line][row];
+
+      if (currentItem !== "*") continue;
+
+      const contactPositions = isItemInContactToPredicate(
+        matrix,
+        line,
+        [row],
+        isNumber
+      );
+
+      const contactPositionByLines = getContactPositionByLine(contactPositions);
+
+      const contactNumbers: number[] = [];
+
+      Object.entries(contactPositionByLines).forEach(([line, positions]) => {
+        const lineNumber = Number.parseInt(line);
+
+        positions.forEach((position) => {
+          contactNumbers.push(
+            findFullNumberFromPosition(matrix, [lineNumber, position])
+          );
+        });
+      });
+
+      if (contactNumbers.length !== 2) continue;
+
+      const totalNumber = contactNumbers[0] * contactNumbers[1];
+      finalGearRation += totalNumber;
+    }
+  }
+
+  return finalGearRation;
 };

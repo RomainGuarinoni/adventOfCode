@@ -4,9 +4,13 @@ import {
   getNumberPositionFromLineWithStartIndex,
   getValidNumbersFromMatrix,
   isNumber,
-  isNumberInContactWithSymbol,
+  isItemInContactToPredicate,
   isSymbol,
+  findFullNumberFromPosition,
+  getContactPositionByLine,
+  findAllGearRatios,
 } from "./helpers";
+import { Position } from "./types";
 
 describe("Day 3", () => {
   describe("isSymbol", () => {
@@ -22,7 +26,7 @@ describe("Day 3", () => {
       expect(isSymbol(input)).toEqual(false);
     });
 
-    it("it should return true with symbol", () => {
+    it("it should return position with symbol", () => {
       const input = "(";
 
       expect(isSymbol(input)).toEqual(true);
@@ -30,7 +34,7 @@ describe("Day 3", () => {
   });
 
   describe("isNumber", () => {
-    it("it should return true with number", () => {
+    it("it should return position with number", () => {
       const input = "3";
 
       expect(isNumber(input)).toEqual(true);
@@ -76,8 +80,8 @@ describe("Day 3", () => {
     });
   });
 
-  describe("isNumberInContactWithSymbol", () => {
-    it("should return true for top contact", () => {
+  describe("isItemInContactToPredicate", () => {
+    it("should return position for top contact", () => {
       const matrix = [
         [".", "*", ".", ".", ".", ".", ".", ".", ".", "."],
         ["2", "3", "4", ".", ".", ".", ".", ".", ".", "."],
@@ -88,12 +92,12 @@ describe("Day 3", () => {
 
       const positions = [0, 1, 2];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[0, 1]]);
     });
 
-    it("should return true for bottom contact", () => {
+    it("should return position for bottom contact", () => {
       const matrix = [
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         ["2", "3", "4", ".", ".", ".", ".", ".", ".", "."],
@@ -104,12 +108,12 @@ describe("Day 3", () => {
 
       const positions = [0, 1, 2];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[2, 1]]);
     });
 
-    it("should return true for right contact", () => {
+    it("should return position for right contact", () => {
       const matrix = [
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         ["2", "3", "*", ".", ".", ".", ".", ".", ".", "."],
@@ -120,12 +124,12 @@ describe("Day 3", () => {
 
       const positions = [0, 1];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[1, 2]]);
     });
 
-    it("should return true for left contact", () => {
+    it("should return position for left contact", () => {
       const matrix = [
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         ["*", "3", "4", ".", ".", ".", ".", ".", ".", "."],
@@ -136,12 +140,12 @@ describe("Day 3", () => {
 
       const positions = [1, 2];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[1, 0]]);
     });
 
-    it("should return true for top left contact", () => {
+    it("should return position for top left contact", () => {
       const matrix = [
         ["*", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         [".", "3", "4", ".", ".", ".", ".", ".", ".", "."],
@@ -152,12 +156,12 @@ describe("Day 3", () => {
 
       const positions = [1, 2];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[0, 0]]);
     });
 
-    it("should return true for top right contact", () => {
+    it("should return position for top right contact", () => {
       const matrix = [
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "*"],
         [".", ".", ".", ".", ".", ".", ".", "3", "3", "."],
@@ -168,12 +172,12 @@ describe("Day 3", () => {
 
       const positions = [7, 8];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[0, 9]]);
     });
 
-    it("should return true for bottom left contact", () => {
+    it("should return position for bottom left contact", () => {
       const matrix = [
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         [".", "3", "4", ".", ".", ".", ".", ".", ".", "."],
@@ -184,12 +188,12 @@ describe("Day 3", () => {
 
       const positions = [1, 2];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[2, 0]]);
     });
 
-    it("should return true for bottom right contact", () => {
+    it("should return position for bottom right contact", () => {
       const matrix = [
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
         [".", ".", ".", ".", ".", ".", ".", "3", "3", "."],
@@ -200,12 +204,12 @@ describe("Day 3", () => {
 
       const positions = [7, 8];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        true
-      );
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([[2, 9]]);
     });
 
-    it("should return false", () => {
+    it("should return empty array", () => {
       const matrix = [
         [".", ".", ".", ".", "*", ".", ".", ".", ".", "."],
         [".", ".", ".", ".", "*", ".", "3", "3", "3", "3"],
@@ -216,9 +220,76 @@ describe("Day 3", () => {
 
       const positions = [6, 7, 8];
 
-      expect(isNumberInContactWithSymbol(matrix, lineIndex, positions)).toEqual(
-        false
+      expect(
+        isItemInContactToPredicate(matrix, lineIndex, positions, isSymbol)
+      ).toEqual([]);
+    });
+
+    it("should return all the positions array", () => {
+      const matrix = [
+        [".", ".", ".", ".", "*", "*", ".", ".", ".", "."],
+        [".", ".", ".", "*", "4", "5", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", "*", "*", ".", ".", "."],
+      ];
+
+      const lineIndex = 1;
+
+      const positions = [4, 5];
+
+      const expectedPositions: Position[] = [
+        [0, 4],
+        [0, 5],
+        [2, 5],
+        [1, 3],
+        [2, 6],
+      ];
+
+      const result = isItemInContactToPredicate(
+        matrix,
+        lineIndex,
+        positions,
+        isSymbol
       );
+
+      expect(result).toEqual(expectedPositions);
+    });
+
+    it("should return all the positions aroundthe gear", () => {
+      const matrix = [
+        ["1", "1", "1"],
+        ["1", "*", "1"],
+        ["1", "1", "1"],
+      ];
+
+      const expectedPositions: Position[] = [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [1, 0],
+        [1, 2],
+        [2, 0],
+        [2, 1],
+        [2, 2],
+      ];
+
+      const lineIndex = 1;
+
+      const positions = [1];
+
+      const contactPositions = isItemInContactToPredicate(
+        matrix,
+        lineIndex,
+        positions,
+        isNumber
+      );
+
+      const contactPositionByLines = getContactPositionByLine(contactPositions);
+
+      expect(contactPositionByLines).toEqual({
+        0: [0],
+        1: [0, 2],
+        2: [0],
+      });
     });
   });
 
@@ -297,6 +368,109 @@ describe("Day 3", () => {
       const sum = numbers.reduce((acc, curr) => acc + curr, 0);
 
       expect(sum).toEqual(0);
+    });
+  });
+
+  describe("findFullNumberFromPosition", () => {
+    it("should return the full number", () => {
+      const matrix = [
+        [".", ".", ".", ".", "*", "*", ".", ".", ".", "."],
+        [".", ".", ".", "*", "4", "5", "4", "3", ".", "."],
+        [".", ".", ".", ".", ".", "*", "*", ".", ".", "."],
+      ];
+
+      const expectedNumber = 4543;
+
+      expect(findFullNumberFromPosition(matrix, [1, 5])).toEqual(
+        expectedNumber
+      );
+    });
+
+    it("should return the full number", () => {
+      const matrix = [
+        [".", ".", "."],
+        ["2", "4", "6"],
+        [".", ".", "."],
+      ];
+
+      const expectedNumber = 246;
+
+      expect(findFullNumberFromPosition(matrix, [1, 1])).toEqual(
+        expectedNumber
+      );
+    });
+  });
+
+  describe("getContactPositionByLine", () => {
+    it("should filter the contact positions", () => {
+      const contactPositions: Position[] = [
+        [0, 3],
+        [0, 4],
+        [0, 1],
+        [0, 10],
+        [1, 5],
+        [1, 6],
+        [2, 8],
+        [2, 4],
+        [0, 20],
+      ];
+
+      const expectedContacts = {
+        0: [1, 3, 10, 20],
+        1: [5],
+        2: [4, 8],
+      };
+
+      expect(getContactPositionByLine(contactPositions)).toEqual(
+        expectedContacts
+      );
+    });
+  });
+
+  describe("e2e findAllGearRatios", () => {
+    it("should return the gear ratio 1", () => {
+      const input = [
+        "467..114..",
+        "...*......",
+        "..35..633.",
+        "......#...",
+        "617*......",
+        ".....+.58.",
+        "..592.....",
+        "......755.",
+        "...$.*....",
+        ".664.598..",
+      ];
+
+      const matrix = createMatrixFromInputs(input);
+
+      const expectedValue = 467835;
+
+      expect(findAllGearRatios(matrix)).toEqual(expectedValue);
+    });
+
+    it("should return the gear ratio 2", () => {
+      const input = [
+        "..2.2..*..",
+        "...*..2.2.",
+        "......2.*.",
+        "..2...*...",
+        "..2*..2...",
+        ".2.2......",
+        "..*..2....",
+        ".2.22*2...",
+        "2.2..2....",
+        ".*2...2*2.",
+      ];
+
+      const gearValue = 4;
+      const nbGear = 4;
+
+      const matrix = createMatrixFromInputs(input);
+
+      const expectedValue = gearValue * nbGear;
+
+      expect(findAllGearRatios(matrix)).toEqual(expectedValue);
     });
   });
 });
