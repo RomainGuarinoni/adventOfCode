@@ -9,22 +9,6 @@ export type Hand =
   | "OnePair"
   | "HighCard";
 
-export const CARD_RANKS: Record<Card, number> = {
-  2: 1,
-  3: 2,
-  4: 3,
-  5: 4,
-  6: 5,
-  7: 6,
-  8: 7,
-  9: 8,
-  T: 9,
-  J: 10,
-  Q: 11,
-  K: 12,
-  A: 13,
-};
-
 export const HAND_RANK: Record<Hand, number> = {
   HighCard: 1,
   OnePair: 2,
@@ -34,3 +18,5 @@ export const HAND_RANK: Record<Hand, number> = {
   FourOfKind: 6,
   FiveOfKind: 7,
 };
+
+export const JOKER: Card = "J";

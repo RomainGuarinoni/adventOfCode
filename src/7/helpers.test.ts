@@ -1,5 +1,10 @@
 import { Hand } from "./constants";
-import { getHand, getTotalWinningScore, sortHand } from "./helpers";
+import {
+  convertJokerToHand,
+  getHand,
+  getTotalWinningScore,
+  sortHand,
+} from "./helpers";
 
 describe("Day 7", () => {
   describe("getHand", () => {
@@ -8,7 +13,7 @@ describe("Day 7", () => {
 
       const res: Hand = "FiveOfKind";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
 
     it("should return a FourOfKind", () => {
@@ -16,7 +21,7 @@ describe("Day 7", () => {
 
       const res: Hand = "FourOfKind";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
 
     it("should return a FullHouse", () => {
@@ -24,7 +29,7 @@ describe("Day 7", () => {
 
       const res: Hand = "FullHouse";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
 
     it("should return a ThreeOfKind", () => {
@@ -32,7 +37,7 @@ describe("Day 7", () => {
 
       const res: Hand = "ThreeOfKind";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
 
     it("should return a TwoPair", () => {
@@ -40,7 +45,7 @@ describe("Day 7", () => {
 
       const res: Hand = "TwoPair";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
 
     it("should return a OnePair", () => {
@@ -48,7 +53,7 @@ describe("Day 7", () => {
 
       const res: Hand = "OnePair";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
 
     it("should return a HighCard", () => {
@@ -56,7 +61,7 @@ describe("Day 7", () => {
 
       const res: Hand = "HighCard";
 
-      expect(getHand(hand)).toEqual(res);
+      expect(getHand(hand, false)).toEqual(res);
     });
   });
 
@@ -71,7 +76,7 @@ describe("Day 7", () => {
         ["12345", 483],
         ["98765", 483],
         ["23456", 483],
-      ];
+      ] as [string, number][];
 
       const expectedCards = [
         ["12345", 483],
@@ -84,7 +89,7 @@ describe("Day 7", () => {
         ["QQQJA", 483],
       ];
 
-      cards.sort(sortHand);
+      cards.sort((a, b) => sortHand(a, b, false));
 
       expect(cards).toEqual(expectedCards);
     });
@@ -98,7 +103,7 @@ describe("Day 7", () => {
         ["AAATQ", 483],
         ["12345", 483],
         ["AA123", 483],
-      ];
+      ] as [string, number][];
 
       const expectedCards = [
         ["12345", 483],
@@ -110,7 +115,7 @@ describe("Day 7", () => {
         ["AAAAA", 684],
       ];
 
-      cards.sort(sortHand);
+      cards.sort((a, b) => sortHand(a, b, false));
 
       expect(cards).toEqual(expectedCards);
     });
@@ -124,11 +129,82 @@ describe("Day 7", () => {
         ["KK677", 28],
         ["KTJJT", 220],
         ["QQQJA", 483],
-      ];
+      ] as [string, number][];
 
       const value = 6440;
 
       const firstFinalNumber = getTotalWinningScore(cards);
+
+      expect(firstFinalNumber).toEqual(value);
+    });
+  });
+
+  describe("convertJokerToHand", () => {
+    it("should convert joker to cards", () => {
+      const cards = {
+        J: 2,
+        2: 1,
+        3: 2,
+      };
+
+      const expectedCards = {
+        2: 1,
+        3: 4,
+      };
+
+      expect(convertJokerToHand(cards)).toEqual(expectedCards);
+    });
+
+    it("should convert joker to cards", () => {
+      const cards = {
+        J: 1,
+        2: 1,
+        A: 2,
+        3: 1,
+      };
+
+      const expectedCards = {
+        2: 1,
+        A: 3,
+        3: 1,
+      };
+
+      expect(convertJokerToHand(cards)).toEqual(expectedCards);
+    });
+
+    it("should convert joker to cards", () => {
+      const cards = {
+        J: 1,
+        2: 1,
+        A: 1,
+        3: 1,
+        T: 1,
+      };
+
+      const expectedCards = {
+        2: 2,
+        A: 1,
+        3: 1,
+        T: 1,
+      };
+
+      expect(convertJokerToHand(cards)).toEqual(expectedCards);
+    });
+  });
+
+  describe("e2e part 2", () => {
+    it("should return 5905", () => {
+      const cards = [
+        ["32T3K", 765],
+        ["T55J5", 684],
+        ["KK677", 28],
+        ["KTJJT", 220],
+        ["QQQJA", 483],
+      ] as [string, number][];
+
+      const value = 5905;
+
+      const firstFinalNumber = getTotalWinningScore(cards, true);
 
       expect(firstFinalNumber).toEqual(value);
     });
